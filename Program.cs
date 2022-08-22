@@ -787,9 +787,6 @@ namespace PrinterNamespace
                     if (s.vtp == "0,00")
                         vat = 3;
                     string sss = "na," + s.na + "\nvt," + Convert.ToString(vat, 10) + "\npr," + Convert.ToString(s.pr, 10) + "\nil," + Convert.ToString(s.il, 10);
-                    Console.WriteLine("ZZZ");
-                    Console.WriteLine(sss);
-                    Console.WriteLine("ZZZ");
                     hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trline"), Marshal.StringToHGlobalAnsi(sss));
                     if (hRequest == IntPtr.Zero)
                     {
@@ -814,9 +811,6 @@ namespace PrinterNamespace
                         zaplacono += p.wa;
                         int re = p.re ? 1 : 0;
                         string ppp = "ty," + Convert.ToString(p.ty, 10) + "\nwa," + Convert.ToString(p.wa, 10) + "\nna," + p.na + "\nre," + Convert.ToString(re, 10);
-                        Console.WriteLine("XXX");
-                        Console.WriteLine(ppp);
-                        Console.WriteLine("XXX");
                         hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trpayment"), Marshal.StringToHGlobalAnsi(ppp));
                         if (hRequest == IntPtr.Zero)
                         {
@@ -863,8 +857,7 @@ namespace PrinterNamespace
                 PrintStatus(POS_WaitForRequestCompleted(hRequest, 5000));
                 POS_DestroyRequest(hRequest);
             }
-
-            Console.WriteLine(printerErrorCode);
+            //Console.WriteLine(printerErrorCode);
             return printerErrorCode;
         }
         public uint PrintStatus(uint status, ref int errorCode)
