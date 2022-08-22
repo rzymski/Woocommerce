@@ -24,12 +24,19 @@ namespace JsonCommunicationNamespace
         public string vtp { get; set; }
         public int pr { get; set; }
     }
+    class SinglePaymentDataJson
+    {
+        public int ty { get; set; }
+        public int wa { get; set; }
+        public string na { get; set; }
+        public bool re { get; set; }
+    }
     class JsonReceivedCommunicate
     {
         public IList<SingleLineJson> lines { get; set; }
         public Dictionary<string, int> summary { get; set; }
         //public IList<SingleLineJson>? extralines { get; set; }
-
+        public IList<SinglePaymentDataJson> payments { get; set; }
         public void WriteJsonCommunicate()
         {
             if (lines != null)
@@ -42,6 +49,14 @@ namespace JsonCommunicationNamespace
             }
             if (summary != null)
                 Console.WriteLine($"Summary = {summary.Keys.First()} : {summary.Values.First()}");
+            if (payments != null)
+            {
+                Console.WriteLine("Payments =");
+                foreach (SinglePaymentDataJson p in payments)
+                {
+                    Console.WriteLine($"ty = {p.ty}     wa = {p.wa}     na = {p.na}     re = {p.re}");
+                }
+            }
         }
     }
     class JsonSendCommunicate
@@ -772,6 +787,9 @@ namespace PrinterNamespace
                     if (s.vtp == "0,00")
                         vat = 3;
                     string sss = "na," + s.na + "\nvt," + Convert.ToString(vat, 10) + "\npr," + Convert.ToString(s.pr, 10) + "\nil," + Convert.ToString(s.il, 10);
+                    Console.WriteLine("ZZZ");
+                    Console.WriteLine(sss);
+                    Console.WriteLine("ZZZ");
                     hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trline"), Marshal.StringToHGlobalAnsi(sss));
                     if (hRequest == IntPtr.Zero)
                     {
@@ -785,9 +803,44 @@ namespace PrinterNamespace
                 }
                 if (printerErrorCode != POSNET_STATUS_OK)
                     break;
+
+                int zaplacono = 0;
+                bool rodzajPlatnosci = false;
+                if (receipt.payments != null)
+                {
+                    rodzajPlatnosci = true;
+                    foreach (SinglePaymentDataJson p in receipt.payments)
+                    {
+                        zaplacono += p.wa;
+                        int re = p.re ? 1 : 0;
+                        string ppp = "ty," + Convert.ToString(p.ty, 10) + "\nwa," + Convert.ToString(p.wa, 10) + "\nna," + p.na + "\nre," + Convert.ToString(re, 10);
+                        Console.WriteLine("XXX");
+                        Console.WriteLine(ppp);
+                        Console.WriteLine("XXX");
+                        hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trpayment"), Marshal.StringToHGlobalAnsi(ppp));
+                        if (hRequest == IntPtr.Zero)
+                        {
+                            PrintStatus(POS_GetError(hLocalDevice), ref printerErrorCode);
+                            break;
+                        }
+                        if (PrintStatus(POS_PostRequest(hRequest, POSNET_REQMODE_SPOOL), ref printerErrorCode) != POSNET_STATUS_OK) break;
+                        if (!WaitForCompleted(hRequest, hLocalDevice)) break;
+                        if (PrintStatus(POS_GetRequestStatus(hRequest), ref printerErrorCode) != POSNET_STATUS_OK) break;
+                        POS_DestroyRequest(hRequest);
+                    }
+                    if (printerErrorCode != POSNET_STATUS_OK)
+                        break;
+                }
+
                 string summaryKey = receipt.summary.Keys.First();
                 string summaryValue = Convert.ToString(receipt.summary.Values.First(), 10);
-                hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trend"), Marshal.StringToHGlobalAnsi(summaryKey + "," + summaryValue));
+                string summaryData = summaryKey + "," + summaryValue;
+                if (rodzajPlatnosci) //jesli wybiera sie inny rodzaj platnosci to w podsumowaniu trzeba sprawdzic czy reszta sie zgadza
+                {
+                    int reszta = zaplacono - receipt.summary.Values.First();
+                    summaryData = summaryKey + "," + summaryValue + "\nre," + reszta + "\nfp," + zaplacono;
+                }
+                hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trend"), Marshal.StringToHGlobalAnsi(summaryData));
                 if (hRequest == IntPtr.Zero)
                 {
                     PrintStatus(POS_GetError(hLocalDevice), ref printerErrorCode);
@@ -800,7 +853,6 @@ namespace PrinterNamespace
 
                 hRequest = IntPtr.Zero;
                 cancel = false;
-
             }
             while (false);
             if (cancel)
@@ -811,6 +863,8 @@ namespace PrinterNamespace
                 PrintStatus(POS_WaitForRequestCompleted(hRequest, 5000));
                 POS_DestroyRequest(hRequest);
             }
+
+            Console.WriteLine(printerErrorCode);
             return printerErrorCode;
         }
         public uint PrintStatus(uint status, ref int errorCode)
