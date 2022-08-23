@@ -615,7 +615,8 @@ namespace DFPrnNamespace
     using JsonCommunicationNamespace;
     public class DFPrnCommunication
     {
-        public const string PosLibDLL = "D:\\Zapisy_programow_C#\\woocommerce\\Git\\PosnetServerWinFormsApp\\Lib\\libposcmbth.dll";
+        //        public const string PosLibDLL = "D:\\Zapisy_programow_C#\\woocommerce\\Git\\PosnetServerWinFormsApp\\Lib\\libposcmbth.dll";
+        public const string PosLibDLL = "C:\\FINA\\libposcmbth.dll";
         [DllImport(PosLibDLL, EntryPoint = "POS_CreateDeviceHandle", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr POS_CreateDeviceHandle(uint deviceType);
         [DllImport(PosLibDLL, EntryPoint = "POS_DestroyDeviceHandle")]
