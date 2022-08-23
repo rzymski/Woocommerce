@@ -902,6 +902,10 @@ namespace PrinterNamespace
                     Console.WriteLine($"Odczytano plik printerSetting.txt ale jest bledna 1 linia pliku. Prawidlowo powinno byc \"rs232\" albo \"eth\". Natomiast odczytano {printerSettings[0]}");
                 }
             }
+            else
+            {
+                Console.WriteLine("Nie znaleziono pliku lub jest on pusty. Upewnij sie ze plik \"printerSetting.txt\" znajduje sie w folderze z plikiem exe.");
+            }
         }
         public void CloseDF()
         {
