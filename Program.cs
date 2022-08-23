@@ -873,8 +873,9 @@ namespace DFPrnNamespace
         }
         private void OpenDF()
         {
-            string settingPrinterPath = System.AppDomain.CurrentDomain.BaseDirectory.ToString();
-            settingPrinterPath += "printerSetting.txt";
+            /*string settingPrinterPath = System.AppDomain.CurrentDomain.BaseDirectory.ToString();
+            settingPrinterPath += "printerSetting.txt";*/
+            string settingPrinterPath = "C:\\FINA\\printerSetting.txt";
             string fileSettingsContent = File.ReadAllText(settingPrinterPath);
             char separatorEndline = '\n';
             string[] printerSettings = fileSettingsContent.Split(separatorEndline);
