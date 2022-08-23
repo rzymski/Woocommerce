@@ -753,7 +753,7 @@ namespace PrinterNamespace
         public PrinterCommunication()
         {
             //InitializeComponent();
-            DFOpen();
+            OpenDF();
         }
 
         public int PrintReceipt(string body)
@@ -869,7 +869,7 @@ namespace PrinterNamespace
             return status;
         }
 
-        private void DFOpen()
+        private void OpenDF()
         {
             uint deviceType = POSNET_INTERFACE_RS232;
             hDevice = POS_CreateDeviceHandle(deviceType);
