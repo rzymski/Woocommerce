@@ -1,0 +1,9 @@
+rs232
+COM3,9600,8,N,1,H
+
+(Program wykorzystuje tylko pierwsze 2-3 linijki z pliku. W zaleznosci czy wybierzemy rs232 czy eth)
+Alternatywne ustawienia: 
+
+eth
+192.168.1.55
+6666
