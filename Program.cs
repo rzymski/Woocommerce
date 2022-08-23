@@ -75,11 +75,12 @@ namespace JsonCommunicationNamespace
 namespace PosnetServerWinFormsApp
 {
     using JsonCommunicationNamespace;
-    using PrinterNamespace;
+    using DFPrnNamespace;
     class HttpServer
     {
         public static HttpListener listener;
-        public static string url = "http://localhost:3050/paragon/";
+        //public static string url = "http://localhost:3050/paragon/";
+        public static string url = "http://localhost:3050/";
         public static int pageViews = 0;
         public static int requestCount = 0;
         public static string pageData = "";
@@ -511,12 +512,13 @@ namespace PosnetServerWinFormsApp
                     if (receipt != null)
                         receipt.WriteJsonCommunicate();
 
-                    PrinterCommunication paragon = new PrinterCommunication();
+                    DFPrnCommunication paragon = new DFPrnCommunication();
                     printerErrorCode = paragon.PrintReceipt(body);
                     paragon.CloseDF();
                 }
 
                 // If `shutdown` url requested w/ POST, then shutdown the server after serving the page
+//                if ((req.HttpMethod == "POST") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
                 if ((req.HttpMethod == "POST") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
                 {
                     Console.WriteLine("Shutdown requested");
@@ -608,48 +610,48 @@ namespace PosnetServerWinFormsApp
     }
 }
 
-namespace PrinterNamespace
+namespace DFPrnNamespace
 {
     using JsonCommunicationNamespace;
-    public class PrinterCommunication
+    public class DFPrnCommunication
     {
-        public const string str = "D:\\Zapisy_programow_C#\\woocommerce\\Git\\PosnetServerWinFormsApp\\Lib\\libposcmbth.dll";
-        [DllImport(str, EntryPoint = "POS_CreateDeviceHandle", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        public const string PosLibDLL = "D:\\Zapisy_programow_C#\\woocommerce\\Git\\PosnetServerWinFormsApp\\Lib\\libposcmbth.dll";
+        [DllImport(PosLibDLL, EntryPoint = "POS_CreateDeviceHandle", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr POS_CreateDeviceHandle(uint deviceType);
-        [DllImport(str, EntryPoint = "POS_DestroyDeviceHandle")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_DestroyDeviceHandle")]
         public static extern uint POS_DestroyDeviceHandle(IntPtr hDevice);
-        [DllImport(str, EntryPoint = "POS_SetDeviceParam", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
+        [DllImport(PosLibDLL, EntryPoint = "POS_SetDeviceParam", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern uint POS_SetDeviceParam(IntPtr hDevice, uint paramCode, IntPtr paramValue);
-        [DllImport(str, EntryPoint = "POS_OpenDevice")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_OpenDevice")]
         public static extern IntPtr POS_OpenDevice(IntPtr hDevice);
         //        POSNET_STATUS __stdcall     POS_CloseDevice(POSNET_HANDLE hLocalDevice)
-        [DllImport(str, EntryPoint = "POS_CloseDevice")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_CloseDevice")]
         public static extern uint POS_CloseDevice(IntPtr hLocalDevice);
-        [DllImport(str, EntryPoint = "POS_GetPrnDeviceStatus")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_GetPrnDeviceStatus")]
         public static extern uint POS_GetPrnDeviceStatus(IntPtr hLocalDevice, byte mode, IntPtr globalStatus, IntPtr printerStatus);
 
         //        POSNET_API POSNET_STATUS __stdcall POS_GetError(POSNET_HANDLE hLocalDevice); // Podaj kod statusu związany z uchwytem urządzenia.
         //        POSNET_API const char* __stdcall    POS_GetErrorString(POSNET_STATUS code, char* lang); // Zwróć tekstowy opis błędu.
-        [DllImport(str, EntryPoint = "POS_GetError")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_GetError")]
         public static extern uint POS_GetError(IntPtr hLocalDevice);
-        [DllImport(str, EntryPoint = "POS_GetErrorString")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_GetErrorString")]
         public static extern char[] POS_GetErrorString(uint code, IntPtr lang);
         //        POSNET_STATUS __stdcall POS_PostRequest(POSNET_HANDLE hRequest, unsigned char mode);  // Fukcja umieszcza obiekt rozkazowy w kolejce rozkazów do wykonania.
-        [DllImport(str, EntryPoint = "POS_CreateRequest")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_CreateRequest")]
         public static extern IntPtr POS_CreateRequest(IntPtr hLocalDevice, IntPtr command);
         //        POSNET_HANDLE __stdcall     POS_CreateRequestEx(POSNET_HANDLE hLocalDevice, const char* command, const char* parameters)
-        [DllImport(str, EntryPoint = "POS_CreateRequestEx")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_CreateRequestEx")]
         public static extern IntPtr POS_CreateRequestEx(IntPtr hLocalDevice, IntPtr command, IntPtr parameters);
-        [DllImport(str, EntryPoint = "POS_PostRequest")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_PostRequest")]
         public static extern uint POS_PostRequest(IntPtr hRequest, byte mode);
         //        POSNET_STATUS __stdcall     POS_WaitForRequestCompleted(POSNET_HANDLE hRequest, unsigned long timeout);   // Czekaj na zakończenie rozkazu.
-        [DllImport(str, EntryPoint = "POS_WaitForRequestCompleted")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_WaitForRequestCompleted")]
         public static extern uint POS_WaitForRequestCompleted(IntPtr hRequest, uint timeout);
         //        POSNET_STATUS __stdcall POS_GetRequestStatus(POSNET_HANDLE hRequest)
-        [DllImport(str, EntryPoint = "POS_GetRequestStatus")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_GetRequestStatus")]
         public static extern uint POS_GetRequestStatus(IntPtr hRequest);
         //        POSNET_STATUS __stdcall     POS_DestroyRequest(POSNET_HANDLE hRequest);  // Zniszczenie obiektu rozkazowego i zwolnienie zajmowanej przezeń pamięci.
-        [DllImport(str, EntryPoint = "POS_DestroyRequest")]
+        [DllImport(PosLibDLL, EntryPoint = "POS_DestroyRequest")]
         public static extern uint POS_DestroyRequest(IntPtr hRequest);
 
 
@@ -750,9 +752,8 @@ namespace PrinterNamespace
         IntPtr hRequest = new IntPtr(0);
 
 
-        public PrinterCommunication()
+        public DFPrnCommunication()
         {
-            //InitializeComponent();
             OpenDF();
         }
 
@@ -777,7 +778,7 @@ namespace PrinterNamespace
 
                 foreach (SingleLineJson s in receipt.lines)
                 {
-                    int vat = 0;
+                    /*int vat = 0;
                     if (s.vtp == "23,00")
                         vat = 0;
                     if (s.vtp == "8,00")
@@ -785,7 +786,8 @@ namespace PrinterNamespace
                     if (s.vtp == "5,00")
                         vat = 2;
                     if (s.vtp == "0,00")
-                        vat = 3;
+                        vat = 3;*/
+                    int vat = 4;  // Poplawska 
                     string sss = "na," + s.na + "\nvt," + Convert.ToString(vat, 10) + "\npr," + Convert.ToString(s.pr, 10) + "\nil," + Convert.ToString(s.il, 10);
                     hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trline"), Marshal.StringToHGlobalAnsi(sss));
                     if (hRequest == IntPtr.Zero)
