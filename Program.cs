@@ -868,33 +868,40 @@ namespace PrinterNamespace
             }
             return status;
         }
-
         private void OpenDF()
         {
-            uint deviceType = POSNET_INTERFACE_RS232;
-            hDevice = POS_CreateDeviceHandle(deviceType);
-            /*
-                        if (!hDevice)
-                        {
-                            cout << "Could not create a device." << endl;
-                            return 2;
-                        }
-            */
-
-            var result = POS_SetDeviceParam(hDevice, POSNET_DEV_PARAM_COMSETTINGS, Marshal.StringToHGlobalAnsi("COM3,9600,8,N,1,H"));
-            hLocalDevice = POS_OpenDevice(hDevice);
-            /*
-                        if (!hLocalDevice)
-                        {
-                            POSNET_STATUS code = POS_GetError(hDevice);
-                            char* c = (char*)POS_GetErrorString(code, "pl");
-                            cout << "Error Opening device: 0x" << hex << code << dec << " ";
-                            if (c) cout << c;
-                            cout << endl;
-                            return 4;
-                        }
-
-            */
+            string settingPrinterPath = System.AppDomain.CurrentDomain.BaseDirectory.ToString();
+            settingPrinterPath += "printerSetting.txt";
+            string fileSettingsContent = File.ReadAllText(settingPrinterPath);
+            char separatorEndline = '\n';
+            string[] printerSettings = fileSettingsContent.Split(separatorEndline);
+            for(int i=0; i < printerSettings.Length; i++)
+                printerSettings[i] = printerSettings[i].Replace("\n", "").Replace("\r", "");
+            if (printerSettings.Length > 0)
+            {
+                if(printerSettings[0] == "rs232")
+                {
+                    uint deviceType = POSNET_INTERFACE_RS232;
+                    hDevice = POS_CreateDeviceHandle(deviceType);
+                    string comSetting = printerSettings[1];
+                    var result = POS_SetDeviceParam(hDevice, POSNET_DEV_PARAM_COMSETTINGS, Marshal.StringToHGlobalAnsi(comSetting));
+                    hLocalDevice = POS_OpenDevice(hDevice);
+                }
+                else if(printerSettings[0] == "eth")
+                {
+                    uint deviceType = POSNET_INTERFACE_ETH;
+                    hDevice = POS_CreateDeviceHandle(deviceType);
+                    string ipSetting = printerSettings[1];
+                    var result = POS_SetDeviceParam(hDevice, POSNET_DEV_PARAM_IP, Marshal.StringToHGlobalAnsi(ipSetting));
+                    string portSetting = printerSettings[2];
+                    var result2 = POS_SetDeviceParam(hDevice, POSNET_DEV_PARAM_IPPORT, Marshal.StringToHGlobalAnsi(portSetting));
+                    hLocalDevice = POS_OpenDevice(hDevice);
+                }
+                else
+                {
+                    Console.WriteLine($"Odczytano plik printerSetting.txt ale jest bledna 1 linia pliku. Prawidlowo powinno byc \"rs232\" albo \"eth\". Natomiast odczytano {printerSettings[0]}");
+                }
+            }
         }
         public void CloseDF()
         {
