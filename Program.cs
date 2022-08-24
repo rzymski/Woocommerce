@@ -789,6 +789,9 @@ namespace DFPrnNamespace
                     if (s.vtp == "0,00")
                         vat = 3;*/
                     int vat = 4;  // Poplawska 
+
+                    if (s.pr <= 0) continue;  // Poplawska - omin pozycje z zerową ceną - Darmowa wysylka
+
                     string sss = "na," + s.na + "\nvt," + Convert.ToString(vat, 10) + "\npr," + Convert.ToString(s.pr, 10) + "\nil," + Convert.ToString(s.il, 10);
                     hRequest = POS_CreateRequestEx(hLocalDevice, Marshal.StringToHGlobalAnsi("trline"), Marshal.StringToHGlobalAnsi(sss));
                     if (hRequest == IntPtr.Zero)
