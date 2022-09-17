@@ -88,6 +88,7 @@ namespace PosnetServerWinFormsApp
         public static async Task HandleIncomingConnections()
         {
             Dictionary<int, string> errorDictionary = new Dictionary<int, string>();
+            #region Dodawanie bledow do slownika
             errorDictionary.Add(0, "Brak Bladu");
             errorDictionary.Add(1, "Brak pamieci");
             errorDictionary.Add(2, "Za krotka ramka");
@@ -469,7 +470,7 @@ namespace PosnetServerWinFormsApp
             errorDictionary.Add(4456461, "Nie znaleziono rozkazu o podanym tokenie");
             errorDictionary.Add(4456462, "Zapelniona kolejka wejsciowa");
             errorDictionary.Add(4456463, "Blad budowy ramki");
-
+            #endregion
 
             bool runServer = true;
             // While a user hasn't visited the `shutdown` url, keep on handling requests
@@ -613,6 +614,7 @@ namespace DFPrnNamespace
     {
         //        public const string PosLibDLL = "D:\\Zapisy_programow_C#\\woocommerce\\Git\\PosnetServerWinFormsApp\\Lib\\libposcmbth.dll";
         public const string PosLibDLL = "C:\\FINA\\libposcmbth.dll";
+        #region importowanie Dll i deklarowanie stalych
         [DllImport(PosLibDLL, EntryPoint = "POS_CreateDeviceHandle", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.StdCall)]
         public static extern IntPtr POS_CreateDeviceHandle(uint deviceType);
         [DllImport(PosLibDLL, EntryPoint = "POS_DestroyDeviceHandle")]
@@ -747,7 +749,7 @@ namespace DFPrnNamespace
         IntPtr hDevice = new IntPtr(0);
         IntPtr hLocalDevice = new IntPtr(0);
         IntPtr hRequest = new IntPtr(0);
-
+        #endregion
 
         public DFPrnCommunication()
         {
