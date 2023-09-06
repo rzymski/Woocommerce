@@ -81,7 +81,6 @@ namespace PosnetServerWinFormsApp
         public static HttpListener listener;
         //public static string url = "http://localhost:3050/paragon/";
         public static string url = "http://localhost:3050/";
-        public static int pageViews = 0;
         public static int requestCount = 0;
         public static string pageData = "";
 
@@ -518,16 +517,29 @@ namespace PosnetServerWinFormsApp
                     paragon.CloseDF();
                 }
 
-                // If `shutdown` url requested w/ POST, then shutdown the server after serving the page
-                //                if ((req.HttpMethod == "POST") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
                 if ((req.HttpMethod == "GET") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
                 {
                     Console.WriteLine("Shutdown requested");
                     runServer = false;
+
+                    pageData=
+                        "<!DOCTYPE>" +
+                        "<html>" +
+                        "  <head>" +
+                        "    <title>HttpListener Example</title>" +
+                        "  </head>" +
+                        "  <body>" +
+                        "    <h1>Program zostal zakonczony</h1>" +
+                        "  </body>" +
+                        "</html>";
+                    byte[] dataShutdown = Encoding.UTF8.GetBytes(String.Format(pageData));
+                    resp.ContentType = "text/html";
+                    resp.ContentEncoding = Encoding.UTF8;
+                    resp.ContentLength64 = dataShutdown.LongLength;
+                    await resp.OutputStream.WriteAsync(dataShutdown, 0, dataShutdown.Length);
+                    resp.Close();
+                    break;
                 }
-                // Make sure we don't increment the page views counter if `favicon.ico` is requested
-                if (req.Url != null && req.Url.AbsolutePath != "/favicon.ico")
-                    pageViews += 1;
 
                 // Write the response info
                 if (req.HasEntityBody)
@@ -559,7 +571,6 @@ namespace PosnetServerWinFormsApp
                     resp.AddHeader("X-Rate-Limit-Limit", "5");
                     resp.AddHeader("X-Rate-Limit-Remaining", "4");
                     resp.AddHeader("Access-Control-Allow-Headers", "Origin,X-Requested-With,Content-Type,Accept");
-
                 }
                 else
                 {
@@ -573,9 +584,7 @@ namespace PosnetServerWinFormsApp
                 resp.AddHeader("Access-Control-Allow-Origin", "*");
                 resp.AddHeader("Connection", "keep-alive");
                 resp.AddHeader("Keep-Alive", "timeout=5");
-
-                string disableSubmit = !runServer ? "disabled" : "";
-                byte[] data = Encoding.UTF8.GetBytes(String.Format(pageData, pageViews, disableSubmit));
+                byte[] data = Encoding.UTF8.GetBytes(String.Format(pageData));
                 resp.ContentEncoding = Encoding.UTF8;
                 resp.ContentLength64 = data.LongLength;
 
