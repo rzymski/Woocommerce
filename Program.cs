@@ -600,6 +600,13 @@ namespace PosnetServerWinFormsApp
         [STAThread]
         static void Main()
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Task.Run(() =>
+            {
+                Application.Run(new SystemTray());
+            });
+
             // Create a Http server and start listening for incoming connections
             listener = new HttpListener();
             listener.Prefixes.Add(url);
