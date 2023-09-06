@@ -337,7 +337,7 @@ namespace PosnetServerWinFormsApp
             errorDictionary.Add(4392950, "urzadzenie w trybie transakcji.");
             errorDictionary.Add(4392951, "zerowe totalizery.");
             errorDictionary.Add(4392952, "Blad obliczen walut  przepelnienie przy mno�eniu lub dzieleniu.");
-            errorDictionary.Add(4392953, "proba zakonczenia pozytywnego paragonu z wartosci� 0");
+            errorDictionary.Add(4392953, "proba zakonczenia pozytywnego paragonu z wartoscia 0");
             errorDictionary.Add(4392954, "Blady format daty poczatkowej");
             errorDictionary.Add(4392955, "Blady format daty koncowej");
             errorDictionary.Add(4392956, "proba wykonania raportu miesiecznego w danym miesiecu");
@@ -519,8 +519,8 @@ namespace PosnetServerWinFormsApp
                 }
 
                 // If `shutdown` url requested w/ POST, then shutdown the server after serving the page
-//                if ((req.HttpMethod == "POST") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
-                if ((req.HttpMethod == "POST") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
+                //                if ((req.HttpMethod == "POST") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
+                if ((req.HttpMethod == "GET") && (req.Url != null && req.Url.AbsolutePath == "/shutdown"))
                 {
                     Console.WriteLine("Shutdown requested");
                     runServer = false;
@@ -532,7 +532,7 @@ namespace PosnetServerWinFormsApp
                 // Write the response info
                 if (req.HasEntityBody)
                 {
-                    if(printerErrorCode == 0)
+                    if (printerErrorCode == 0)
                     {
                         resp.StatusCode = 200;
                         JsonSendCommunicate responseBody = new JsonSendCommunicate
@@ -552,7 +552,7 @@ namespace PosnetServerWinFormsApp
                     {
                         resp.StatusCode = 500;
                         //string responseBody = "{{\"ok\":false,\"code\":1,\"message\":\"Kod: "+Convert.ToString(printerErrorCode, 10)+" BLAD DRUKARKI\"}}";
-                        string responseBody = "{{\"ok\":false,\"code\":1,\"message\":\"Kod: "+Convert.ToString(printerErrorCode, 10)+" "+errorDictionary[printerErrorCode]+"\"}}";
+                        string responseBody = "{{\"ok\":false,\"code\":1,\"message\":\"Kod: " + Convert.ToString(printerErrorCode, 10) + " " + errorDictionary[printerErrorCode] + "\"}}";
                         pageData = responseBody;
                     }
                     resp.AddHeader("Content-Type", "application/json;charset=utf-8");
@@ -880,11 +880,11 @@ namespace DFPrnNamespace
             string fileSettingsContent = File.ReadAllText(settingPrinterPath);
             char separatorEndline = '\n';
             string[] printerSettings = fileSettingsContent.Split(separatorEndline);
-            for(int i=0; i < printerSettings.Length; i++)
+            for (int i = 0; i < printerSettings.Length; i++)
                 printerSettings[i] = printerSettings[i].Replace("\n", "").Replace("\r", "");
             if (printerSettings.Length > 0)
             {
-                if(printerSettings[0] == "rs232")
+                if (printerSettings[0] == "rs232")
                 {
                     uint deviceType = POSNET_INTERFACE_RS232;
                     hDevice = POS_CreateDeviceHandle(deviceType);
@@ -892,7 +892,7 @@ namespace DFPrnNamespace
                     var result = POS_SetDeviceParam(hDevice, POSNET_DEV_PARAM_COMSETTINGS, Marshal.StringToHGlobalAnsi(comSetting));
                     hLocalDevice = POS_OpenDevice(hDevice);
                 }
-                else if(printerSettings[0] == "eth")
+                else if (printerSettings[0] == "eth")
                 {
                     uint deviceType = POSNET_INTERFACE_ETH;
                     hDevice = POS_CreateDeviceHandle(deviceType);
