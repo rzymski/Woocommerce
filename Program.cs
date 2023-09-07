@@ -541,6 +541,32 @@ namespace PosnetServerWinFormsApp
                     break;
                 }
 
+                if ((req.HttpMethod == "GET") && (req.Url != null && req.Url.AbsolutePath == "/status"))
+                {
+                    Console.WriteLine("Check Status requested");
+                    DFPrnCommunication stanDrukarki = new DFPrnCommunication();
+                    int statusCode = stanDrukarki.CheckStatus();
+                    stanDrukarki.CloseDF();
+
+                    pageData =
+                        "<!DOCTYPE>" +
+                        "<html>" +
+                        "  <head>" +
+                        "    <title>HttpListener Example</title>" +
+                        "  </head>" +
+                        "  <body>" +
+                        "    <h1>Aktualny status drukarki: {0} {1}</h1>" +
+                        "  </body>" +
+                        "</html>";
+                    byte[] dataStatus = Encoding.UTF8.GetBytes(String.Format(pageData, statusCode, errorDictionary[statusCode]));
+                    resp.ContentType = "text/html";
+                    resp.ContentEncoding = Encoding.UTF8;
+                    resp.ContentLength64 = dataStatus.LongLength;
+                    await resp.OutputStream.WriteAsync(dataStatus, 0, dataStatus.Length);
+                    resp.Close();
+                    continue;
+                }
+
                 // Write the response info
                 if (req.HasEntityBody)
                 {
@@ -770,6 +796,17 @@ namespace DFPrnNamespace
         public DFPrnCommunication()
         {
             OpenDF();
+        }
+
+        public int CheckStatus()
+        {
+            int printerErrorCode = 0;
+            IntPtr hRequest = new IntPtr(0);
+            if (hRequest != IntPtr.Zero) POS_DestroyRequest(hRequest);
+            hRequest = POS_CreateRequest(hLocalDevice, Marshal.StringToHGlobalAnsi("scomm"));
+            PrintStatus(POS_GetRequestStatus(hRequest), ref printerErrorCode);
+            POS_DestroyRequest(hRequest);
+            return printerErrorCode;
         }
 
         public int PrintReceipt(string body)
